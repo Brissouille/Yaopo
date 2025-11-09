@@ -7,3 +7,7 @@ struct yaopo_err_handle
   OSSL_FUNC_core_set_error_debug_fn *core_set_error_debug;
   OSSL_FUNC_core_vset_error_fn *core_vset_error;
 };
+
+int yaopo_error_init(struct yaopo_err_handle** err_handle, const OSSL_DISPATCH *in);
+
+void yaopo_error_free(struct yaopo_err_handle* err_handle);

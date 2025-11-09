@@ -8,12 +8,29 @@ struct yaopo_ctx {
     struct yaopo_err_handle *err_handle;
 };
 
+typedef void (*funcptr_t)(void);
+
+static const OSSL_ALGORITHM* yaopo_operation(void *ctx,
+                                             int operation_id,
+                                             int *no_cache)
+{
+}
+
+static const OSSL_ITEM* yaopo_get_reason_strings(void *ctx)
+{
+}
+
+static void yaopo_teardown(void *ctx)
+{
+    free(ctx);
+}
+
 /* The yaopo functions */
 static const OSSL_DISPATCH yaopo_functions[] = {
     { OSSL_FUNC_PROVIDER_TEARDOWN, (funcptr_t)yaopo_teardown },
     { OSSL_FUNC_PROVIDER_QUERY_OPERATION, (funcptr_t)yaopo_operation },
     { OSSL_FUNC_PROVIDER_GET_REASON_STRINGS, (funcptr_t)yaopo_get_reason_strings },
-    { OSSL_FUNC_PROVIDER_GET_PARAMS, (funcptr_t)yaopo_get_params },
+    //{ OSSL_FUNC_PROVIDER_GET_PARAMS, (funcptr_t)yaopo_get_params },
     { 0, NULL }
 };
 
@@ -23,7 +40,6 @@ int OSSL_provider_init(const OSSL_CORE_HANDLE *handle,
                        void **provctx)
 {
     struct yaopo_ctx *ctx = NULL;
-    OSSL_DISPATCH* iterator = NULL;
     int status = 0;
 
     do
@@ -39,31 +55,15 @@ int OSSL_provider_init(const OSSL_CORE_HANDLE *handle,
 
         ctx->core_handle = handle;
 
-        //Init the error routines TODO
-        ctx->err_handle = calloc(sizeof(*(ctx->err_handle)), 1);
+        // Init the error handle with allocation
+        status = yaopo_error_init(&(ctx->err_handle), in);
 
-        if (ctx->err_handle == NULL)
+        if (status == 0)
         {
-            // ERROR
-            status = 0;
             break;
         }
 
-        for (iterator = (OSSL_DISPATCH*)in; iterator->function_id != 0; iterator++)
-        {
-            switch (iterator->function_id) {
-                case OSSL_FUNC_CORE_NEW_ERROR:
-                    ctx->err_handle->core_new_error = OSSL_FUNC_core_new_error(iterator);
-                    break;
-                case OSSL_FUNC_CORE_SET_ERROR_DEBUG:
-                    ctx->err_handle->core_set_error_debug = OSSL_FUNC_core_set_error_debug(iterator);
-                    break;
-                case OSSL_FUNC_CORE_VSET_ERROR:
-                    ctx->err_handle->core_vset_error = OSSL_FUNC_core_vset_error(iterator); 
-            }
-        }
-
-        // Init by the function of the provider
+        // Init by the functions of the provider
         *out = yaopo_functions;
 
         // Everything is ok
@@ -74,11 +74,8 @@ int OSSL_provider_init(const OSSL_CORE_HANDLE *handle,
     // if error case, then we free the allocated variables
     if (status == 0)
     {
-        if (ctx->err_handle != NULL)
-        {
-            free(ctx->err_handle);
-            ctx->err_handle = NULL;
-        }
+        yaopo_error_free(ctx->err_handle);
+        ctx->err_handle = NULL;
 
         if (ctx != NULL)
         {
