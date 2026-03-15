@@ -11,14 +11,27 @@ struct yaopo_ctx {
 
 typedef void (*funcptr_t)(void);
 
+extern const OSSL_ALGORITHM yaopo_ciphers[];
+
 static const OSSL_ALGORITHM* yaopo_operation(void *ctx,
                                              int operation_id,
                                              int *no_cache)
 {
+    *no_cache = 0;
+    switch (operation_id) {
+    case OSSL_OP_CIPHER:
+        return yaopo_ciphers;
+    }
+    return NULL;
 }
+
+static const OSSL_ITEM reason_strings[] = {{ 1, "Unknown Error" },
+                                           { 0, NULL }
+};
 
 static const OSSL_ITEM* yaopo_get_reason_strings(void *ctx)
 {
+    return reason_strings;
 }
 
 static void yaopo_teardown(void *ctx)
