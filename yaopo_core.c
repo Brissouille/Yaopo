@@ -1,5 +1,6 @@
 #include <openssl/core.h>
 #include <openssl/core_dispatch.h>
+#include <string.h>
 
 #include "yaopo_err.h"
 
@@ -23,6 +24,18 @@ static const OSSL_ITEM* yaopo_get_reason_strings(void *ctx)
 static void yaopo_teardown(void *ctx)
 {
     free(ctx);
+}
+
+static int yaopo_get_params(OSSL_PARAM params[])
+{
+    for (OSSL_PARAM *p = params; p->key != NULL; p++)
+    {
+        if (strcmp(p->key, "author") == 0)
+        {
+            return 1;
+        }
+    }
+    return 0;
 }
 
 /* The yaopo functions */
