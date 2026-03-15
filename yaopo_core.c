@@ -53,11 +53,11 @@ static int yaopo_get_params(OSSL_PARAM params[])
 
 /* The yaopo functions */
 static const OSSL_DISPATCH yaopo_functions[] = {
-    { OSSL_FUNC_PROVIDER_TEARDOWN, (funcptr_t)yaopo_teardown },
     { OSSL_FUNC_PROVIDER_QUERY_OPERATION, (funcptr_t)yaopo_operation },
     { OSSL_FUNC_PROVIDER_GET_REASON_STRINGS, (funcptr_t)yaopo_get_reason_strings },
-    //{ OSSL_FUNC_PROVIDER_GET_PARAMS, (funcptr_t)yaopo_get_params },
-    { 0, NULL }
+    { OSSL_FUNC_PROVIDER_TEARDOWN, (funcptr_t)yaopo_teardown },
+    { OSSL_FUNC_PROVIDER_GET_PARAMS, (funcptr_t)yaopo_get_params },
+    {0, NULL }
 };
 
 int OSSL_provider_init(const OSSL_CORE_HANDLE *handle,
