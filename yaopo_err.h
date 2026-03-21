@@ -1,5 +1,8 @@
 #include <openssl/core_dispatch.h>
 
+#ifndef YAOPO_ERR_H
+#define YAOPO_ERR_H
+
 struct yaopo_err_handle 
 {
   const OSSL_CORE_HANDLE *core;
@@ -11,3 +14,5 @@ struct yaopo_err_handle
 int yaopo_error_init(struct yaopo_err_handle** err_handle, const OSSL_DISPATCH *in);
 
 void yaopo_error_free(struct yaopo_err_handle* err_handle);
+
+#endif // YAOPO_ERR_H
