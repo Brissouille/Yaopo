@@ -3,10 +3,12 @@
 #include <string.h>
 
 #include "yaopo_err.h"
+#include "tee_interface.h"
 
 struct yaopo_ctx {
     const OSSL_CORE_HANDLE *core_handle;
     struct yaopo_err_handle *err_handle;
+    struct tee_ctx *tee_ctx;
 };
 
 typedef void (*funcptr_t)(void);
