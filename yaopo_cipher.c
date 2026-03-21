@@ -14,9 +14,9 @@ struct yaopo_cipher_ctx
 
 static OSSL_FUNC_cipher_newctx_fn yaopo_cipher_newctx;
 static OSSL_FUNC_cipher_dupctx_fn yaopo_cipher_dupctx;
-
-
 static OSSL_FUNC_cipher_freectx_fn yaopo_cipher_freectx;
+static OSSL_FUNC_cipher_encrypt_init_fn yaopo_cipher_encrypt_init;
+static OSSL_FUNC_cipher_decrypt_init_fn yaopo_cipher_decrypt_init;
 
 static void *yaopo_cipher_newctx(void *yaopo_ctx)
 {
@@ -89,6 +89,65 @@ static void yaopo_cipher_freectx(void *ctx)
     }
 }
 
+static int yaopo_cipher_core_init(void *yc_ctx,
+                                     const uint8_t *key,
+                                     size_t key_size,
+                                     const uint8_t *iv,
+                                     size_t iv_size,
+                                     const OSSL_PARAM params[])
+{
+    struct yaopo_cipher_ctx* yaopo_cipher_ctx = (struct yaopo_cipher_ctx*)yc_ctx;
+    int status = 0;
+    do {
+        if (yaopo_cipher_ctx == NULL)
+            break;
+
+        if (key == NULL)
+            break;
+
+        if (iv == NULL)
+            break;
+
+        if (iv_size == 0)
+            break;
+
+        if (key_size == 0)
+            break;
+
+        // key given, the yaopo_cipher_ctx can be initialised now
+        yaopo_cipher_ctx->key = calloc(1, key_size);
+        memcpy(yaopo_cipher_ctx->key, key, key_size);
+
+        yaopo_cipher_ctx->iv = calloc(1, iv_size);
+        memcpy(yaopo_cipher_ctx->iv, iv, iv_size);
+
+        status = 1;
+    } while(0);
+
+    // error 0 error, 1 success
+    return status;
+}
+
+static int yaopo_cipher_encrypt_init(void *yc_ctx,
+                                     const uint8_t *key,
+                                     size_t key_size,
+                                     const uint8_t *iv,
+                                     size_t iv_size,
+                                     const OSSL_PARAM params[])
+{
+    return yaopo_cipher_core_init(yc_ctx, key, key_size, iv, iv_size, params);
+}
+
+static int yaopo_cipher_decrypt_init(void *yc_ctx,
+                                     const uint8_t *key,
+                                     size_t key_size,
+                                     const uint8_t *iv,
+                                     size_t iv_size,
+                                     const OSSL_PARAM params[])
+{
+    return yaopo_cipher_core_init(yc_ctx, key, key_size, iv, iv_size, params);
+}
+
 typedef void (*funcptr_t)(void);
 
 /* The cipher dispatch table */
@@ -96,9 +155,9 @@ static const OSSL_DISPATCH yaopo_cipher_functions[] = {
     { OSSL_FUNC_CIPHER_NEWCTX, (funcptr_t)yaopo_cipher_newctx },
     { OSSL_FUNC_CIPHER_DUPCTX, (funcptr_t)yaopo_cipher_dupctx },
     { OSSL_FUNC_CIPHER_FREECTX, (funcptr_t)yaopo_cipher_freectx },
-#if 0
     { OSSL_FUNC_CIPHER_ENCRYPT_INIT, (funcptr_t)yaopo_cipher_encrypt_init },
     { OSSL_FUNC_CIPHER_DECRYPT_INIT, (funcptr_t)yaopo_cipher_decrypt_init },
+#if 0
     { OSSL_FUNC_CIPHER_UPDATE, (funcptr_t)yaopo_cipher_update },
     { OSSL_FUNC_CIPHER_FINAL, (funcptr_t)yaopo_cipher_final },
     { OSSL_FUNC_CIPHER_GET_PARAMS, (funcptr_t)yaopo_cipher_get_params },
