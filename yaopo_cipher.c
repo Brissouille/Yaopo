@@ -111,6 +111,6 @@ static const OSSL_DISPATCH yaopo_cipher_functions[] = {
 
 const OSSL_ALGORITHM yaopo_ciphers[] = {
     { "yaopo_cipher:0.1", "x.author='Brissouille'",
-      yaopo_cipher_functions },
+      yaopo_cipher_functions, "Symetric Yaopo Cipher functions"},
     { NULL, NULL, NULL }
 };
