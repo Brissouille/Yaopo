@@ -5,6 +5,8 @@
 #include "yaopo_err.h"
 #include "tee_interface.h"
 
+extern const OSSL_ALGORITHM yaopo_ciphers[];
+
 struct yaopo_ctx {
     const OSSL_CORE_HANDLE *core_handle;
     struct yaopo_err_handle *err_handle;
@@ -12,8 +14,6 @@ struct yaopo_ctx {
 };
 
 typedef void (*funcptr_t)(void);
-
-extern const OSSL_ALGORITHM yaopo_ciphers[];
 
 static const OSSL_ALGORITHM* yaopo_operation(void *ctx,
                                              int operation_id,
