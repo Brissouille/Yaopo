@@ -23,6 +23,8 @@ static void *yaopo_cipher_newctx(void *yaopo_ctx)
     struct yaopo_cipher_ctx* ctx = NULL;
     ctx = calloc(1, sizeof(*ctx));
 
+    //Key not initialised because no value
+
     return (void*)ctx;
 }
 
