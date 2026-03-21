@@ -1,6 +1,7 @@
 #include <openssl/core.h>
 #include <openssl/core_dispatch.h>
 #include <stdio.h>
+#include <string.h>
 
 struct yaopo_cipher_ctx
 {
@@ -11,6 +12,8 @@ struct yaopo_cipher_ctx
 
 static OSSL_FUNC_cipher_newctx_fn yaopo_cipher_newctx;
 static OSSL_FUNC_cipher_dupctx_fn yaopo_cipher_dupctx;
+
+
 static OSSL_FUNC_cipher_freectx_fn yaopo_cipher_freectx;
 
 static void *yaopo_cipher_newctx(void *yaopo_ctx)
@@ -21,9 +24,50 @@ static void *yaopo_cipher_newctx(void *yaopo_ctx)
     return (void*)ctx;
 }
 
-static void *yaopo_cipher_dupctx(void *yaopo_ctx)
+static void *yaopo_cipher_dupctx(void *yc_ctx)
 {
-    printf("[%s %d]\n", __func__, __LINE__);
+    struct yaopo_cipher_ctx* src_ctx = yc_ctx;
+    struct yaopo_cipher_ctx* copy_ctx = NULL;
+    uint8_t *key_copy = NULL;
+    int error = 1;
+
+    do {
+        copy_ctx = calloc(1, sizeof(*copy_ctx));
+
+        if (copy_ctx == NULL)
+            break;
+
+        key_copy = calloc(1, src_ctx->key_size);
+
+        if (key_copy == NULL)
+            break;
+
+        memcpy(key_copy, src_ctx->key, src_ctx->key_size);
+
+        //Perform the copy from src to copy
+        copy_ctx->key = key_copy;
+        copy_ctx->key_size = src_ctx->key_size;
+        copy_ctx->enc = src_ctx->enc;
+
+        error = 0;
+    } while(0);
+
+    if (error == 1)
+    {
+        if (key_copy != NULL)
+        {
+            free(key_copy);
+            key_copy = NULL;
+        }
+
+        if (copy_ctx != NULL)
+        {
+            free(copy_ctx);
+            copy_ctx = NULL;
+        }
+    }
+
+    return copy_ctx;
 }
 
 static void yaopo_cipher_freectx(void *yaopo_ctx)
