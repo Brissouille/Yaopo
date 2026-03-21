@@ -70,11 +70,21 @@ static void *yaopo_cipher_dupctx(void *yc_ctx)
     return copy_ctx;
 }
 
-static void yaopo_cipher_freectx(void *yaopo_ctx)
+static void yaopo_cipher_freectx(void *ctx)
 {
-    struct yaopo_cipher_ctx* ctx = yaopo_ctx;
+    struct yaopo_cipher_ctx* yc_ctx = ctx;
 
-    free(ctx);
+    if (yc_ctx->key != NULL)
+    {
+        free(yc_ctx->key);
+        yc_ctx->key = NULL;
+    }
+
+    if (yc_ctx != NULL)
+    {
+        free(yc_ctx);
+        yc_ctx = NULL;
+    }
 }
 
 typedef void (*funcptr_t)(void);
