@@ -39,6 +39,7 @@ static const OSSL_ITEM* yaopo_get_reason_strings(void *ctx)
 static void yaopo_teardown(void *ctx)
 {
     free(ctx);
+    ctx = NULL;
 }
 
 static int yaopo_get_params(OSSL_PARAM params[])
