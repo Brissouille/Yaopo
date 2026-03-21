@@ -31,6 +31,7 @@ static void *yaopo_cipher_dupctx(void *yc_ctx)
     struct yaopo_cipher_ctx* src_ctx = yc_ctx;
     struct yaopo_cipher_ctx* copy_ctx = NULL;
     uint8_t *key_copy = NULL;
+    uint8_t *iv_copy = NULL;
     int error = 1;
 
     do {
@@ -44,11 +45,21 @@ static void *yaopo_cipher_dupctx(void *yc_ctx)
         if (key_copy == NULL)
             break;
 
+        iv_copy = calloc(1, src_ctx->iv_size);
+
+        if (iv_copy == NULL)
+            break;
+
         memcpy(key_copy, src_ctx->key, src_ctx->key_size);
+        memcpy(iv_copy, src_ctx->iv, src_ctx->iv_size);
 
         //Perform the copy from src to copy
         copy_ctx->key = key_copy;
         copy_ctx->key_size = src_ctx->key_size;
+
+        copy_ctx->iv = iv_copy;
+        copy_ctx->iv_size = src_ctx->iv_size;
+
         copy_ctx->enc = src_ctx->enc;
 
         error = 0;
