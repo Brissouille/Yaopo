@@ -6,7 +6,9 @@
 struct yaopo_cipher_ctx
 {
     uint8_t *key;
-    uint8_t key_size;
+    size_t key_size;
+    uint8_t *iv;
+    size_t iv_size;
     int enc;
 };
 
