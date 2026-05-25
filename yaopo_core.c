@@ -42,11 +42,29 @@ static void yaopo_teardown(void *ctx)
     ctx = NULL;
 }
 
+static const OSSL_PARAM yaopo_param[] = {
+    { "buildinfo", OSSL_PARAM_UTF8_STRING, NULL, 11, -1 },
+    { "name", OSSL_PARAM_UTF8_STRING, NULL, 5, -1 },
+    { "provider-name", OSSL_PARAM_UTF8_STRING, NULL, 14, -1 },
+    { "status", OSSL_PARAM_UTF8_STRING, NULL, 7, -1 },
+    { "version", OSSL_PARAM_UTF8_STRING, NULL, 8, -1 },
+    {NULL, 0, NULL, 0, 0}
+};
+
+static const OSSL_PARAM *yaopo_gettable_params(const OSSL_PROVIDER *prov)
+{
+    return OSSL_PARAM_dup(yaopo_param);
+}
+
 static int yaopo_get_params(OSSL_PARAM params[])
 {
-    for (OSSL_PARAM *p = params; p->key != NULL; p++)
+    // params can be NULL
+    if (params == NULL)
+        return 1;
+
+    for (OSSL_PARAM *p = params; p != NULL && p->key != NULL; p++)
     {
-        if (strcmp(p->key, "author") == 0)
+        if (strcmp(p->key, "buildinfo") == 0)
         {
             return 1;
         }
@@ -59,6 +77,7 @@ static const OSSL_DISPATCH yaopo_functions[] = {
     { OSSL_FUNC_PROVIDER_QUERY_OPERATION, (funcptr_t)yaopo_operation },
     { OSSL_FUNC_PROVIDER_GET_REASON_STRINGS, (funcptr_t)yaopo_get_reason_strings },
     { OSSL_FUNC_PROVIDER_TEARDOWN, (funcptr_t)yaopo_teardown },
+    { OSSL_FUNC_PROVIDER_GETTABLE_PARAMS, (funcptr_t)yaopo_gettable_params },
     { OSSL_FUNC_PROVIDER_GET_PARAMS, (funcptr_t)yaopo_get_params },
     {0, NULL }
 };

@@ -1,4 +1,4 @@
-#ifdef TEE_INTERFACE_H
+#ifndef TEE_INTERFACE_H
 
 #define TEE_INTERFACE_H
 

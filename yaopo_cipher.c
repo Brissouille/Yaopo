@@ -17,6 +17,8 @@ static OSSL_FUNC_cipher_dupctx_fn yaopo_cipher_dupctx;
 static OSSL_FUNC_cipher_freectx_fn yaopo_cipher_freectx;
 static OSSL_FUNC_cipher_encrypt_init_fn yaopo_cipher_encrypt_init;
 static OSSL_FUNC_cipher_decrypt_init_fn yaopo_cipher_decrypt_init;
+static OSSL_FUNC_cipher_update_fn yaopo_cipher_update;
+static OSSL_FUNC_cipher_final_fn yaopo_cipher_final;
 
 static void *yaopo_cipher_newctx(void *yaopo_ctx)
 {
@@ -161,6 +163,23 @@ static int yaopo_cipher_decrypt_init(void *yc_ctx,
     return yaopo_cipher_core_init(yc_ctx, key, key_size, iv, iv_size, params);
 }
 
+static int yaopo_cipher_update(void *yc_ctx,
+                           uint8_t *out, size_t *outl, size_t outsz,
+                           const uint8_t *in, size_t in_size)
+{
+    if (in != NULL)
+        return 0;
+    *out = *in;
+    *outl = in_size;
+    return 1;
+}
+
+static int yaopo_cipher_final(void *yc_ctx,
+                          uint8_t *out, size_t *outl, size_t outsz)
+{
+    return 1;
+}
+
 typedef void (*funcptr_t)(void);
 
 /* The cipher dispatch table */
@@ -170,21 +189,21 @@ static const OSSL_DISPATCH yaopo_cipher_functions[] = {
     { OSSL_FUNC_CIPHER_FREECTX, (funcptr_t)yaopo_cipher_freectx },
     { OSSL_FUNC_CIPHER_ENCRYPT_INIT, (funcptr_t)yaopo_cipher_encrypt_init },
     { OSSL_FUNC_CIPHER_DECRYPT_INIT, (funcptr_t)yaopo_cipher_decrypt_init },
-#if 0
     { OSSL_FUNC_CIPHER_UPDATE, (funcptr_t)yaopo_cipher_update },
     { OSSL_FUNC_CIPHER_FINAL, (funcptr_t)yaopo_cipher_final },
-    { OSSL_FUNC_CIPHER_GET_PARAMS, (funcptr_t)yaopo_cipher_get_params },
+#if 0
     { OSSL_FUNC_CIPHER_GETTABLE_PARAMS, (funcptr_t)yaopo_cipher_gettable_params },
-    { OSSL_FUNC_CIPHER_GET_CTX_PARAMS, (funcptr_t)yaopo_cipher_get_ctx_params },
+    { OSSL_FUNC_CIPHER_GET_PARAMS, (funcptr_t)yaopo_cipher_get_params },
     { OSSL_FUNC_CIPHER_GETTABLE_CTX_PARAMS, (funcptr_t)yaopo_cipher_gettable_ctx_params },
-    { OSSL_FUNC_CIPHER_SET_CTX_PARAMS, (funcptr_t)yaopo_cipher_set_ctx_params },
+    { OSSL_FUNC_CIPHER_GET_CTX_PARAMS, (funcptr_t)yaopo_cipher_get_ctx_params },
     { OSSL_FUNC_CIPHER_SETTABLE_CTX_PARAMS, (funcptr_t)yaopo_cipher_settable_ctx_params },
+    { OSSL_FUNC_CIPHER_SET_CTX_PARAMS, (funcptr_t)yaopo_cipher_set_ctx_params },
 #endif
     { 0, NULL }
 };
 
 const OSSL_ALGORITHM yaopo_ciphers[] = {
-    { "yaopo_cipher:0.1", "x.author='Brissouille'",
-      yaopo_cipher_functions, "Symetric Yaopo Cipher functions"},
-    { NULL, NULL, NULL }
+    { "yaopo_cipher_aes:0.1", "author='Brissouille'",
+      yaopo_cipher_functions, "Symetric Yaopo Cipher AES functions"},
+    { NULL, NULL, NULL, NULL}
 };
