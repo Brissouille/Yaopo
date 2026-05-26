@@ -56,20 +56,45 @@ static const OSSL_PARAM *yaopo_gettable_params(const OSSL_PROVIDER *prov)
     return OSSL_PARAM_dup(yaopo_param);
 }
 
+#define BUILDINFO "test"
+#define AUTHOR "Brissouille"
+#define PROVIDER_NAME "Yaopo"
+#define STATUS "experimental"
+#define VERSION "0.1"
+
 static int yaopo_get_params(OSSL_PARAM params[])
 {
     // params can be NULL
     if (params == NULL)
         return 1;
 
-    for (OSSL_PARAM *p = params; p != NULL && p->key != NULL; p++)
-    {
+    for (OSSL_PARAM *p = params; p != NULL && p->key != NULL; p++) {
+        const char *src = NULL;
         if (strcmp(p->key, "buildinfo") == 0)
-        {
-            return 1;
-        }
+            src = BUILDINFO;
+        else if (strcmp(p->key, "name") == 0)
+            src = AUTHOR;
+        else if (strcmp(p->key, "provider-name") == 0)
+            src = PROVIDER_NAME;
+        else if (strcmp(p->key, "status") == 0)
+            src = STATUS;
+        else if (strcmp(p->key, "version") == 0)
+            src = VERSION;
+        else
+            continue;
+
+        size_t len = strlen(src);
+        p->return_size = len;
+
+        if (p->data == NULL)
+            continue; // just return the size of data to the caller
+
+        if (p->data_size < len + 1)
+            return 0;
+
+        memcpy(p->data, src, len + 1);
     }
-    return 0;
+    return 1;
 }
 
 /* The yaopo functions */
