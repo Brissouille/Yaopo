@@ -62,7 +62,7 @@ static const OSSL_PARAM *yaopo_gettable_params(const OSSL_PROVIDER *prov)
 #define STATUS "experimental"
 #define VERSION "0.1"
 
-static int yaopo_get_params(OSSL_PARAM params[])
+static int yaopo_get_params(void *provctx, OSSL_PARAM params[])
 {
     // params can be NULL
     if (params == NULL)
@@ -94,6 +94,7 @@ static int yaopo_get_params(OSSL_PARAM params[])
 
         memcpy(p->data, src, len + 1);
     }
+
     return 1;
 }
 
@@ -136,8 +137,20 @@ int OSSL_provider_init(const OSSL_CORE_HANDLE *handle,
             break;
         }
 
+        if (out == NULL)
+        {
+            status = 0;
+            break;
+        }
         // Init by the functions of the provider
         *out = yaopo_functions;
+
+        if (provctx == NULL)
+        {
+            status = 0;
+            break;
+        }
+        *provctx = ctx;
 
         // Everything is ok
         status = 1;
@@ -147,11 +160,11 @@ int OSSL_provider_init(const OSSL_CORE_HANDLE *handle,
     // if error case, then we free the allocated variables
     if (status == 0)
     {
-        yaopo_error_free(ctx->err_handle);
-        ctx->err_handle = NULL;
-
         if (ctx != NULL)
         {
+            yaopo_error_free(ctx->err_handle);
+            ctx->err_handle = NULL;
+
             free(ctx);
             ctx = NULL;
         }

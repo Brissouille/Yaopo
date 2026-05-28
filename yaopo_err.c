@@ -5,9 +5,14 @@ int yaopo_error_init(struct yaopo_err_handle** err_handle, const OSSL_DISPATCH *
     OSSL_DISPATCH* iterator = NULL;
     struct yaopo_err_handle *err_handle_tmp = NULL;
 
-    if(err_handle == NULL && *err_handle != NULL)
+    if(err_handle == NULL || *err_handle != NULL)
     {
         // there is a problem
+        return 0;
+    }
+
+    if (in == NULL)
+    {
         return 0;
     }
 
