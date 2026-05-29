@@ -167,7 +167,7 @@ static int yaopo_cipher_update(void *yc_ctx,
                            uint8_t *out, size_t *outl, size_t outsz,
                            const uint8_t *in, size_t in_size)
 {
-    if (in != NULL)
+    if (in == NULL)
         return 0;
     *out = *in;
     *outl = in_size;
