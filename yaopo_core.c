@@ -1,5 +1,6 @@
 #include <openssl/core.h>
 #include <openssl/core_dispatch.h>
+#include <openssl/core_names.h>
 #include <string.h>
 
 #include "yaopo_err.h"
@@ -19,7 +20,6 @@ static const OSSL_ALGORITHM* yaopo_operation(void *ctx,
                                              int operation_id,
                                              int *no_cache)
 {
-    *no_cache = 0;
     switch (operation_id) {
     case OSSL_OP_CIPHER:
         return yaopo_ciphers;
@@ -43,12 +43,11 @@ static void yaopo_teardown(void *ctx)
 }
 
 static const OSSL_PARAM yaopo_param[] = {
-    { "buildinfo", OSSL_PARAM_UTF8_STRING, NULL, 11, -1 },
-    { "name", OSSL_PARAM_UTF8_STRING, NULL, 5, -1 },
-    { "provider-name", OSSL_PARAM_UTF8_STRING, NULL, 14, -1 },
-    { "status", OSSL_PARAM_UTF8_STRING, NULL, 7, -1 },
-    { "version", OSSL_PARAM_UTF8_STRING, NULL, 8, -1 },
-    {NULL, 0, NULL, 0, 0}
+    OSSL_PARAM_DEFN(OSSL_PROV_PARAM_NAME, OSSL_PARAM_UTF8_PTR, NULL, 0),
+    OSSL_PARAM_DEFN(OSSL_PROV_PARAM_VERSION, OSSL_PARAM_UTF8_PTR, NULL, 0),
+    OSSL_PARAM_DEFN(OSSL_PROV_PARAM_BUILDINFO, OSSL_PARAM_UTF8_PTR, NULL, 0),
+    OSSL_PARAM_DEFN(OSSL_PROV_PARAM_STATUS, OSSL_PARAM_INTEGER, NULL, 0),
+    OSSL_PARAM_END
 };
 
 static const OSSL_PARAM *yaopo_gettable_params(const OSSL_PROVIDER *prov)
@@ -58,41 +57,38 @@ static const OSSL_PARAM *yaopo_gettable_params(const OSSL_PROVIDER *prov)
 
 #define BUILDINFO "test"
 #define AUTHOR "Brissouille"
-#define PROVIDER_NAME "Yaopo"
-#define STATUS "experimental"
+#define STATUS 1
 #define VERSION "0.1"
 
 static int yaopo_get_params(void *provctx, OSSL_PARAM params[])
 {
+    const char *src = NULL;
+    size_t len = 0;
+
     // params can be NULL
     if (params == NULL)
         return 1;
 
     for (OSSL_PARAM *p = params; p != NULL && p->key != NULL; p++) {
-        const char *src = NULL;
-        if (strcmp(p->key, "buildinfo") == 0)
-            src = BUILDINFO;
-        else if (strcmp(p->key, "name") == 0)
-            src = AUTHOR;
-        else if (strcmp(p->key, "provider-name") == 0)
-            src = PROVIDER_NAME;
-        else if (strcmp(p->key, "status") == 0)
-            src = STATUS;
-        else if (strcmp(p->key, "version") == 0)
-            src = VERSION;
+
+        if (strcmp(p->key, OSSL_PROV_PARAM_BUILDINFO) == 0)
+        {
+            OSSL_PARAM_set_utf8_ptr(p, BUILDINFO);
+        }
+        else if (strcmp(p->key, OSSL_PROV_PARAM_NAME) == 0)
+        {
+            OSSL_PARAM_set_utf8_ptr(p, AUTHOR);
+        }
+        else if (strcmp(p->key, OSSL_PROV_PARAM_STATUS) == 0)
+        {
+            OSSL_PARAM_set_int(p, STATUS);
+        }
+        else if (strcmp(p->key, OSSL_PROV_PARAM_VERSION) == 0)
+        {
+            OSSL_PARAM_set_utf8_ptr(p, VERSION);
+        }
         else
             continue;
-
-        size_t len = strlen(src);
-        p->return_size = len;
-
-        if (p->data == NULL)
-            continue; // just return the size of data to the caller
-
-        if (p->data_size < len + 1)
-            return 0;
-
-        memcpy(p->data, src, len + 1);
     }
 
     return 1;
