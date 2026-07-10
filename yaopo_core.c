@@ -16,15 +16,19 @@ struct yaopo_ctx {
 
 typedef void (*funcptr_t)(void);
 
-static const OSSL_ALGORITHM* yaopo_operation(void *ctx,
+static const OSSL_ALGORITHM* yaopo_operation(void *provctx,
                                              int operation_id,
                                              int *no_cache)
 {
+    const OSSL_ALGORITHM* algo_list_tmp = NULL;
+
+    *no_cache = 0;
     switch (operation_id) {
     case OSSL_OP_CIPHER:
-        return yaopo_ciphers;
+        algo_list_tmp = yaopo_ciphers;
+        break;
     }
-    return NULL;
+    return algo_list_tmp;
 }
 
 static const OSSL_ITEM reason_strings[] = {{ 1, "Unknown Error" },
