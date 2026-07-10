@@ -1,5 +1,6 @@
 #include <openssl/core.h>
 #include <openssl/core_dispatch.h>
+#include <openssl/core_names.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -77,6 +78,12 @@ static void *yaopo_cipher_dupctx(void *yc_ctx)
             key_copy = NULL;
         }
 
+        if (iv_copy != NULL)
+        {
+            free(iv_copy);
+            iv_copy = NULL;
+        }
+
         if (copy_ctx != NULL)
         {
             free(copy_ctx);
@@ -95,6 +102,12 @@ static void yaopo_cipher_freectx(void *ctx)
     {
         free(yc_ctx->key);
         yc_ctx->key = NULL;
+    }
+
+    if (yc_ctx->iv != NULL)
+    {
+        free(yc_ctx->iv);
+        yc_ctx->iv = NULL;
     }
 
     if (yc_ctx != NULL)
@@ -167,7 +180,7 @@ static int yaopo_cipher_update(void *yc_ctx,
                            uint8_t *out, size_t *outl, size_t outsz,
                            const uint8_t *in, size_t in_size)
 {
-    if (in == NULL)
+    if (in != NULL)
         return 0;
     *out = *in;
     *outl = in_size;

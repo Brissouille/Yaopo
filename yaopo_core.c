@@ -62,9 +62,6 @@ static const OSSL_PARAM *yaopo_gettable_params(const OSSL_PROVIDER *prov)
 
 static int yaopo_get_params(void *provctx, OSSL_PARAM params[])
 {
-    const char *src = NULL;
-    size_t len = 0;
-
     // params can be NULL
     if (params == NULL)
         return 1;
