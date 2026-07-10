@@ -193,6 +193,61 @@ static int yaopo_cipher_final(void *yc_ctx,
     return 1;
 }
 
+static const OSSL_PARAM yaopo_cipher_gettable_params_list[] = {
+    OSSL_PARAM_uint(OSSL_CIPHER_PARAM_MODE, NULL),
+    OSSL_PARAM_size_t(OSSL_CIPHER_PARAM_KEYLEN, NULL),
+    OSSL_PARAM_size_t(OSSL_CIPHER_PARAM_IVLEN, NULL),
+    OSSL_PARAM_size_t(OSSL_CIPHER_PARAM_BLOCK_SIZE, NULL),
+    OSSL_PARAM_int(OSSL_CIPHER_PARAM_AEAD, NULL),
+    OSSL_PARAM_int(OSSL_CIPHER_PARAM_CUSTOM_IV, NULL),
+    OSSL_PARAM_int(OSSL_CIPHER_PARAM_CTS, NULL),
+    OSSL_PARAM_int(OSSL_CIPHER_PARAM_TLS1_MULTIBLOCK, NULL),
+    OSSL_PARAM_int(OSSL_CIPHER_PARAM_HAS_RAND_KEY, NULL),
+    OSSL_PARAM_int(OSSL_CIPHER_PARAM_ENCRYPT_THEN_MAC, NULL),
+    OSSL_PARAM_int("ready", NULL),
+    OSSL_PARAM_END
+};
+
+const OSSL_PARAM *yaopo_cipher_gettable_params(void *provctx)
+{
+    (void)provctx;
+    printf("[%s %d]", __func__, __LINE__);
+    return yaopo_cipher_gettable_params_list;
+};
+
+static int yaopo_cipher_get_params(OSSL_PARAM params[])
+{
+    for(OSSL_PARAM *p = params; p != NULL && p->key != NULL; p++) {
+
+        printf("[%s %d] p->key = %s\n", __func__, __LINE__, p->key);
+
+        if (strcmp(p->key, OSSL_CIPHER_PARAM_MODE))
+            OSSL_PARAM_set_uint(p, 0);
+        else if (strcmp(p->key, OSSL_CIPHER_PARAM_KEYLEN))
+            OSSL_PARAM_set_size_t(p, 0);
+        else if (strcmp(p->key, OSSL_CIPHER_PARAM_IVLEN))
+            OSSL_PARAM_set_size_t(p, 0);
+        else if (strcmp(p->key, OSSL_CIPHER_PARAM_BLOCK_SIZE))
+            OSSL_PARAM_set_size_t(p, 0);
+        else if (strcmp(p->key,OSSL_CIPHER_PARAM_AEAD))
+            OSSL_PARAM_set_int(p, 0);
+        else if (strcmp(p->key,OSSL_CIPHER_PARAM_CUSTOM_IV))
+            OSSL_PARAM_set_int(p, 0);
+        else if (strcmp(p->key,OSSL_CIPHER_PARAM_CTS))
+            OSSL_PARAM_set_int(p, 0);
+        else if (strcmp(p->key,OSSL_CIPHER_PARAM_TLS1_MULTIBLOCK))
+            OSSL_PARAM_set_int(p, 0);
+        else if (strcmp(p->key,OSSL_CIPHER_PARAM_HAS_RAND_KEY))
+            OSSL_PARAM_set_int(p, 1);
+        else if (strcmp(p->key,OSSL_CIPHER_PARAM_ENCRYPT_THEN_MAC))
+            OSSL_PARAM_set_int(p, 0);
+        else
+            continue;
+    }
+
+    return 1;
+}
+
 typedef void (*funcptr_t)(void);
 
 /* The cipher dispatch table */
@@ -204,9 +259,9 @@ static const OSSL_DISPATCH yaopo_cipher_functions[] = {
     { OSSL_FUNC_CIPHER_DECRYPT_INIT, (funcptr_t)yaopo_cipher_decrypt_init },
     { OSSL_FUNC_CIPHER_UPDATE, (funcptr_t)yaopo_cipher_update },
     { OSSL_FUNC_CIPHER_FINAL, (funcptr_t)yaopo_cipher_final },
-#if 0
     { OSSL_FUNC_CIPHER_GETTABLE_PARAMS, (funcptr_t)yaopo_cipher_gettable_params },
     { OSSL_FUNC_CIPHER_GET_PARAMS, (funcptr_t)yaopo_cipher_get_params },
+#if 0
     { OSSL_FUNC_CIPHER_GETTABLE_CTX_PARAMS, (funcptr_t)yaopo_cipher_gettable_ctx_params },
     { OSSL_FUNC_CIPHER_GET_CTX_PARAMS, (funcptr_t)yaopo_cipher_get_ctx_params },
     { OSSL_FUNC_CIPHER_SETTABLE_CTX_PARAMS, (funcptr_t)yaopo_cipher_settable_ctx_params },
@@ -216,7 +271,6 @@ static const OSSL_DISPATCH yaopo_cipher_functions[] = {
 };
 
 const OSSL_ALGORITHM yaopo_ciphers[] = {
-    { "yaopo_cipher_aes:0.1", "author='Brissouille'",
-      yaopo_cipher_functions, "Symetric Yaopo Cipher AES functions"},
+    { "YAOPO_CIPHER", "provider=yaopo", yaopo_cipher_functions },
     { NULL, NULL, NULL, NULL}
 };
