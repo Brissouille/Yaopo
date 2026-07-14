@@ -221,25 +221,25 @@ static int yaopo_cipher_get_params(OSSL_PARAM params[])
 
         printf("[%s %d] p->key = %s\n", __func__, __LINE__, p->key);
 
-        if (strcmp(p->key, OSSL_CIPHER_PARAM_MODE))
+        if (strcmp(p->key, OSSL_CIPHER_PARAM_MODE) == 0)
             OSSL_PARAM_set_uint(p, 0);
-        else if (strcmp(p->key, OSSL_CIPHER_PARAM_KEYLEN))
+        else if (strcmp(p->key, OSSL_CIPHER_PARAM_KEYLEN) == 0)
             OSSL_PARAM_set_size_t(p, 0);
-        else if (strcmp(p->key, OSSL_CIPHER_PARAM_IVLEN))
+        else if (strcmp(p->key, OSSL_CIPHER_PARAM_IVLEN) == 0)
             OSSL_PARAM_set_size_t(p, 0);
-        else if (strcmp(p->key, OSSL_CIPHER_PARAM_BLOCK_SIZE))
+        else if (strcmp(p->key, OSSL_CIPHER_PARAM_BLOCK_SIZE) == 0)
             OSSL_PARAM_set_size_t(p, 0);
-        else if (strcmp(p->key,OSSL_CIPHER_PARAM_AEAD))
+        else if (strcmp(p->key,OSSL_CIPHER_PARAM_AEAD) == 0)
             OSSL_PARAM_set_int(p, 0);
-        else if (strcmp(p->key,OSSL_CIPHER_PARAM_CUSTOM_IV))
+        else if (strcmp(p->key,OSSL_CIPHER_PARAM_CUSTOM_IV) == 0)
             OSSL_PARAM_set_int(p, 0);
-        else if (strcmp(p->key,OSSL_CIPHER_PARAM_CTS))
+        else if (strcmp(p->key,OSSL_CIPHER_PARAM_CTS) == 0)
             OSSL_PARAM_set_int(p, 0);
-        else if (strcmp(p->key,OSSL_CIPHER_PARAM_TLS1_MULTIBLOCK))
+        else if (strcmp(p->key,OSSL_CIPHER_PARAM_TLS1_MULTIBLOCK) == 0)
             OSSL_PARAM_set_int(p, 0);
-        else if (strcmp(p->key,OSSL_CIPHER_PARAM_HAS_RAND_KEY))
+        else if (strcmp(p->key,OSSL_CIPHER_PARAM_HAS_RAND_KEY) == 0)
             OSSL_PARAM_set_int(p, 1);
-        else if (strcmp(p->key,OSSL_CIPHER_PARAM_ENCRYPT_THEN_MAC))
+        else if (strcmp(p->key,OSSL_CIPHER_PARAM_ENCRYPT_THEN_MAC) == 0)
             OSSL_PARAM_set_int(p, 0);
         else
             continue;
