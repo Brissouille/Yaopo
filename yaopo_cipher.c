@@ -280,6 +280,30 @@ static int yaopo_cipher_get_ctx_params(void *vctx, OSSL_PARAM params[])
     return 1;
 }
 
+static const OSSL_PARAM yaopo_cipher_settable_ctx_params_list[] = {
+    OSSL_PARAM_uint(OSSL_CIPHER_PARAM_PADDING, NULL),
+    OSSL_PARAM_uint(OSSL_CIPHER_PARAM_NUM, NULL),
+    OSSL_PARAM_uint(OSSL_CIPHER_PARAM_USE_BITS, NULL),
+    OSSL_PARAM_uint(OSSL_CIPHER_PARAM_TLS_VERSION, NULL),
+    OSSL_PARAM_size_t(OSSL_CIPHER_PARAM_TLS_MAC_SIZE, NULL),
+    OSSL_PARAM_END
+};
+
+static const OSSL_PARAM *yaopo_cipher_settable_ctx_params(ossl_unused void *cctx, ossl_unused void *provctx)
+{
+    return yaopo_cipher_gettable_ctx_params_list;
+}
+
+static int yaopo_cipher_set_ctx_params(void *vctx, OSSL_PARAM params[])
+{
+    OSSL_PARAM *p;
+    for(p = params; p != NULL && p->key != NULL; p++) {
+        printf("[%s %d] p->key = %s\n", __func__, __LINE__, p->key);
+    }
+
+    return 1;
+}
+
 typedef void (*funcptr_t)(void);
 
 /* The cipher dispatch table */
@@ -295,10 +319,8 @@ static const OSSL_DISPATCH yaopo_cipher_functions[] = {
     { OSSL_FUNC_CIPHER_GET_PARAMS, (funcptr_t)yaopo_cipher_get_params },
     { OSSL_FUNC_CIPHER_GETTABLE_CTX_PARAMS, (funcptr_t)yaopo_cipher_gettable_ctx_params },
     { OSSL_FUNC_CIPHER_GET_CTX_PARAMS, (funcptr_t)yaopo_cipher_get_ctx_params },
-#if 0
     { OSSL_FUNC_CIPHER_SETTABLE_CTX_PARAMS, (funcptr_t)yaopo_cipher_settable_ctx_params },
     { OSSL_FUNC_CIPHER_SET_CTX_PARAMS, (funcptr_t)yaopo_cipher_set_ctx_params },
-#endif
     { 0, NULL }
 };
 
