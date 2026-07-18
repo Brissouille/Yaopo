@@ -180,9 +180,9 @@ static int yaopo_cipher_update(void *yc_ctx,
                            uint8_t *out, size_t *outl, size_t outsz,
                            const uint8_t *in, size_t in_size)
 {
-    if (in != NULL)
+    if (in == NULL)
         return 0;
-    *out = *in;
+     memcpy(out, in, in_size);
     *outl = in_size;
     return 1;
 }
@@ -190,6 +190,8 @@ static int yaopo_cipher_update(void *yc_ctx,
 static int yaopo_cipher_final(void *yc_ctx,
                           uint8_t *out, size_t *outl, size_t outsz)
 {
+    out = NULL;
+    *outl = 0;
     return 1;
 }
 
@@ -291,7 +293,7 @@ static const OSSL_PARAM yaopo_cipher_settable_ctx_params_list[] = {
 
 static const OSSL_PARAM *yaopo_cipher_settable_ctx_params(ossl_unused void *cctx, ossl_unused void *provctx)
 {
-    return yaopo_cipher_gettable_ctx_params_list;
+    return yaopo_cipher_settable_ctx_params_list;
 }
 
 static int yaopo_cipher_set_ctx_params(void *vctx, OSSL_PARAM params[])
