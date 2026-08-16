@@ -63,9 +63,9 @@ static const OSSL_PARAM yaopo_param[] = {
     OSSL_PARAM_END
 };
 
-static const OSSL_PARAM *yaopo_gettable_params(const OSSL_PROVIDER *prov)
+static const OSSL_PARAM *yaopo_gettable_params(void* prov)
 {
-    return OSSL_PARAM_dup(yaopo_param);
+    return yaopo_param;
 }
 
 static int yaopo_get_params(void *provctx, OSSL_PARAM params[])
