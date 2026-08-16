@@ -6,6 +6,14 @@
 #include "yaopo_err.h"
 #include "tee_interface.h"
 
+#define BUILDINFO "test"
+#define AUTHOR "Brissouille"
+#define STATUS 1
+#define VERSION "0.1"
+#define TEE_SESSION_MAX 8
+
+#define OSSL_PROV_PARAM_TEE_SESSION_MAX "yaopo:tee_session_max"
+
 extern const OSSL_ALGORITHM yaopo_ciphers[];
 
 struct yaopo_ctx {
@@ -51,6 +59,7 @@ static const OSSL_PARAM yaopo_param[] = {
     OSSL_PARAM_DEFN(OSSL_PROV_PARAM_VERSION, OSSL_PARAM_UTF8_PTR, NULL, 0),
     OSSL_PARAM_DEFN(OSSL_PROV_PARAM_BUILDINFO, OSSL_PARAM_UTF8_PTR, NULL, 0),
     OSSL_PARAM_DEFN(OSSL_PROV_PARAM_STATUS, OSSL_PARAM_INTEGER, NULL, 0),
+    OSSL_PARAM_DEFN(OSSL_PROV_PARAM_TEE_SESSION_MAX, OSSL_PARAM_INTEGER, NULL, 0),
     OSSL_PARAM_END
 };
 
@@ -58,11 +67,6 @@ static const OSSL_PARAM *yaopo_gettable_params(const OSSL_PROVIDER *prov)
 {
     return OSSL_PARAM_dup(yaopo_param);
 }
-
-#define BUILDINFO "test"
-#define AUTHOR "Brissouille"
-#define STATUS 1
-#define VERSION "0.1"
 
 static int yaopo_get_params(void *provctx, OSSL_PARAM params[])
 {
@@ -87,6 +91,10 @@ static int yaopo_get_params(void *provctx, OSSL_PARAM params[])
         else if (strcmp(p->key, OSSL_PROV_PARAM_VERSION) == 0)
         {
             OSSL_PARAM_set_utf8_ptr(p, VERSION);
+        }
+        else if (strcmp(p->key, OSSL_PROV_PARAM_TEE_SESSION_MAX) == 0)
+        {
+            OSSL_PARAM_set_int(p, (int)TEE_SESSION_MAX);
         }
         else
             continue;
