@@ -13,25 +13,26 @@ struct yaopo_cipher_ctx
     int enc;
 };
 
-static OSSL_FUNC_cipher_newctx_fn yaopo_cipher_newctx;
-static OSSL_FUNC_cipher_dupctx_fn yaopo_cipher_dupctx;
-static OSSL_FUNC_cipher_freectx_fn yaopo_cipher_freectx;
-static OSSL_FUNC_cipher_encrypt_init_fn yaopo_cipher_encrypt_init;
-static OSSL_FUNC_cipher_decrypt_init_fn yaopo_cipher_decrypt_init;
-static OSSL_FUNC_cipher_update_fn yaopo_cipher_update;
-static OSSL_FUNC_cipher_final_fn yaopo_cipher_final;
+static OSSL_FUNC_cipher_newctx_fn yaopo_cipher_aes_cbc_newctx;
+static OSSL_FUNC_cipher_dupctx_fn yaopo_cipher_aes_cbc_dupctx;
+static OSSL_FUNC_cipher_freectx_fn yaopo_cipher_aes_cbc_freectx;
+static OSSL_FUNC_cipher_encrypt_init_fn yaopo_cipher_aes_cbc_encrypt_init;
+static OSSL_FUNC_cipher_decrypt_init_fn yaopo_cipher_aes_cbc_decrypt_init;
+static OSSL_FUNC_cipher_update_fn yaopo_cipher_aes_cbc_update;
+static OSSL_FUNC_cipher_final_fn yaopo_cipher_aes_cbc_final;
 
-static void *yaopo_cipher_newctx(void *yaopo_ctx)
+static void *yaopo_cipher_aes_cbc_newctx(void *yaopo_ctx)
 {
     struct yaopo_cipher_ctx* ctx = NULL;
     ctx = calloc(1, sizeof(*ctx));
 
     //Key not initialised because no value
 
+    //TODO give a reference to the tee or provider itself
     return (void*)ctx;
 }
 
-static void *yaopo_cipher_dupctx(void *yc_ctx)
+static void *yaopo_cipher_aes_cbc_dupctx(void *yc_ctx)
 {
     struct yaopo_cipher_ctx* src_ctx = yc_ctx;
     struct yaopo_cipher_ctx* copy_ctx = NULL;
@@ -94,7 +95,7 @@ static void *yaopo_cipher_dupctx(void *yc_ctx)
     return copy_ctx;
 }
 
-static void yaopo_cipher_freectx(void *ctx)
+static void yaopo_cipher_aes_cbc_freectx(void *ctx)
 {
     struct yaopo_cipher_ctx* yc_ctx = ctx;
 
@@ -117,7 +118,7 @@ static void yaopo_cipher_freectx(void *ctx)
     }
 }
 
-static int yaopo_cipher_core_init(void *yc_ctx,
+static int yaopo_cipher_aes_cbc_core_init(void *yc_ctx,
                                      const uint8_t *key,
                                      size_t key_size,
                                      const uint8_t *iv,
@@ -156,27 +157,27 @@ static int yaopo_cipher_core_init(void *yc_ctx,
     return status;
 }
 
-static int yaopo_cipher_encrypt_init(void *yc_ctx,
+static int yaopo_cipher_aes_cbc_encrypt_init(void *yc_ctx,
                                      const uint8_t *key,
                                      size_t key_size,
                                      const uint8_t *iv,
                                      size_t iv_size,
                                      const OSSL_PARAM params[])
 {
-    return yaopo_cipher_core_init(yc_ctx, key, key_size, iv, iv_size, params);
+    return yaopo_cipher_aes_cbc_core_init(yc_ctx, key, key_size, iv, iv_size, params);
 }
 
-static int yaopo_cipher_decrypt_init(void *yc_ctx,
+static int yaopo_cipher_aes_cbc_decrypt_init(void *yc_ctx,
                                      const uint8_t *key,
                                      size_t key_size,
                                      const uint8_t *iv,
                                      size_t iv_size,
                                      const OSSL_PARAM params[])
 {
-    return yaopo_cipher_core_init(yc_ctx, key, key_size, iv, iv_size, params);
+    return yaopo_cipher_aes_cbc_core_init(yc_ctx, key, key_size, iv, iv_size, params);
 }
 
-static int yaopo_cipher_update(void *yc_ctx,
+static int yaopo_cipher_aes_cbc_update(void *yc_ctx,
                            uint8_t *out, size_t *outl, size_t outsz,
                            const uint8_t *in, size_t in_size)
 {
@@ -187,7 +188,7 @@ static int yaopo_cipher_update(void *yc_ctx,
     return 1;
 }
 
-static int yaopo_cipher_final(void *yc_ctx,
+static int yaopo_cipher_aes_cbc_final(void *yc_ctx,
                           uint8_t *out, size_t *outl, size_t outsz)
 {
     out = NULL;
@@ -195,7 +196,7 @@ static int yaopo_cipher_final(void *yc_ctx,
     return 1;
 }
 
-static const OSSL_PARAM yaopo_cipher_gettable_params_list[] = {
+static const OSSL_PARAM yaopo_cipher_aes_cbc_gettable_params_list[] = {
     OSSL_PARAM_uint(OSSL_CIPHER_PARAM_MODE, NULL),
     OSSL_PARAM_size_t(OSSL_CIPHER_PARAM_KEYLEN, NULL),
     OSSL_PARAM_size_t(OSSL_CIPHER_PARAM_IVLEN, NULL),
@@ -210,18 +211,16 @@ static const OSSL_PARAM yaopo_cipher_gettable_params_list[] = {
     OSSL_PARAM_END
 };
 
-const OSSL_PARAM *yaopo_cipher_gettable_params(void *provctx)
+const OSSL_PARAM *yaopo_cipher_aes_cbc_gettable_params(void *provctx)
 {
     (void)provctx;
-    printf("[%s %d]", __func__, __LINE__);
-    return yaopo_cipher_gettable_params_list;
+    return yaopo_cipher_aes_cbc_gettable_params_list;
 };
 
-static int yaopo_cipher_get_params(OSSL_PARAM params[])
+static int yaopo_cipher_aes_cbc_get_params(OSSL_PARAM params[])
 {
     for(OSSL_PARAM *p = params; p != NULL && p->key != NULL; p++) {
 
-        printf("[%s %d] p->key = %s\n", __func__, __LINE__, p->key);
 
         if (strcmp(p->key, OSSL_CIPHER_PARAM_MODE) == 0)
             OSSL_PARAM_set_uint(p, 0);
@@ -250,20 +249,21 @@ static int yaopo_cipher_get_params(OSSL_PARAM params[])
     return 1;
 }
 
-static const OSSL_PARAM yaopo_cipher_gettable_ctx_params_list[] = {
+static const OSSL_PARAM yaopo_cipher_aes_cbc_gettable_ctx_params_list[] = {
     OSSL_PARAM_size_t(OSSL_CIPHER_PARAM_KEYLEN, NULL),
     OSSL_PARAM_size_t(OSSL_CIPHER_PARAM_IVLEN, NULL),
     OSSL_PARAM_size_t(OSSL_CIPHER_PARAM_BLOCK_SIZE, NULL),
     OSSL_PARAM_END
 };
 
-static const OSSL_PARAM *yaopo_cipher_gettable_ctx_params(ossl_unused void *cctx, ossl_unused void *provctx)
+static const OSSL_PARAM *yaopo_cipher_aes_cbc_gettable_ctx_params(ossl_unused void *cctx, ossl_unused void *provctx)
 {
-    return yaopo_cipher_gettable_ctx_params_list;
+    return yaopo_cipher_aes_cbc_gettable_ctx_params_list;
 }
 
-static int yaopo_cipher_get_ctx_params(void *vctx, OSSL_PARAM params[])
+static int yaopo_cipher_aes_cbc_get_ctx_params(void *vctx, OSSL_PARAM params[])
 {
+    printf("[%s %d]", __func__, __LINE__);
     OSSL_PARAM *p;
     for(p = params; p != NULL && p->key != NULL; p++) {
         printf("[%s %d] p->key = %s\n", __func__, __LINE__, p->key);
@@ -282,7 +282,7 @@ static int yaopo_cipher_get_ctx_params(void *vctx, OSSL_PARAM params[])
     return 1;
 }
 
-static const OSSL_PARAM yaopo_cipher_settable_ctx_params_list[] = {
+static const OSSL_PARAM yaopo_cipher_aes_cbc_settable_ctx_params_list[] = {
     OSSL_PARAM_uint(OSSL_CIPHER_PARAM_PADDING, NULL),
     OSSL_PARAM_uint(OSSL_CIPHER_PARAM_NUM, NULL),
     OSSL_PARAM_uint(OSSL_CIPHER_PARAM_USE_BITS, NULL),
@@ -291,13 +291,15 @@ static const OSSL_PARAM yaopo_cipher_settable_ctx_params_list[] = {
     OSSL_PARAM_END
 };
 
-static const OSSL_PARAM *yaopo_cipher_settable_ctx_params(ossl_unused void *cctx, ossl_unused void *provctx)
+static const OSSL_PARAM *yaopo_cipher_aes_cbc_settable_ctx_params(ossl_unused void *cctx, ossl_unused void *provctx)
 {
-    return yaopo_cipher_settable_ctx_params_list;
+    printf("[%s %d]", __func__, __LINE__);
+    return yaopo_cipher_aes_cbc_settable_ctx_params_list;
 }
 
-static int yaopo_cipher_set_ctx_params(void *vctx, OSSL_PARAM params[])
+static int yaopo_cipher_aes_cbc_set_ctx_params(void *vctx, OSSL_PARAM params[])
 {
+    printf("[%s %d]", __func__, __LINE__);
     OSSL_PARAM *p;
     for(p = params; p != NULL && p->key != NULL; p++) {
         printf("[%s %d] p->key = %s\n", __func__, __LINE__, p->key);
@@ -309,24 +311,24 @@ static int yaopo_cipher_set_ctx_params(void *vctx, OSSL_PARAM params[])
 typedef void (*funcptr_t)(void);
 
 /* The cipher dispatch table */
-static const OSSL_DISPATCH yaopo_cipher_functions[] = {
-    { OSSL_FUNC_CIPHER_NEWCTX, (funcptr_t)yaopo_cipher_newctx },
-    { OSSL_FUNC_CIPHER_DUPCTX, (funcptr_t)yaopo_cipher_dupctx },
-    { OSSL_FUNC_CIPHER_FREECTX, (funcptr_t)yaopo_cipher_freectx },
-    { OSSL_FUNC_CIPHER_ENCRYPT_INIT, (funcptr_t)yaopo_cipher_encrypt_init },
-    { OSSL_FUNC_CIPHER_DECRYPT_INIT, (funcptr_t)yaopo_cipher_decrypt_init },
-    { OSSL_FUNC_CIPHER_UPDATE, (funcptr_t)yaopo_cipher_update },
-    { OSSL_FUNC_CIPHER_FINAL, (funcptr_t)yaopo_cipher_final },
-    { OSSL_FUNC_CIPHER_GETTABLE_PARAMS, (funcptr_t)yaopo_cipher_gettable_params },
-    { OSSL_FUNC_CIPHER_GET_PARAMS, (funcptr_t)yaopo_cipher_get_params },
-    { OSSL_FUNC_CIPHER_GETTABLE_CTX_PARAMS, (funcptr_t)yaopo_cipher_gettable_ctx_params },
-    { OSSL_FUNC_CIPHER_GET_CTX_PARAMS, (funcptr_t)yaopo_cipher_get_ctx_params },
-    { OSSL_FUNC_CIPHER_SETTABLE_CTX_PARAMS, (funcptr_t)yaopo_cipher_settable_ctx_params },
-    { OSSL_FUNC_CIPHER_SET_CTX_PARAMS, (funcptr_t)yaopo_cipher_set_ctx_params },
+static const OSSL_DISPATCH yaopo_cipher_aes_cbc_functions[] = {
+    { OSSL_FUNC_CIPHER_NEWCTX, (funcptr_t)yaopo_cipher_aes_cbc_newctx },
+    { OSSL_FUNC_CIPHER_DUPCTX, (funcptr_t)yaopo_cipher_aes_cbc_dupctx },
+    { OSSL_FUNC_CIPHER_FREECTX, (funcptr_t)yaopo_cipher_aes_cbc_freectx },
+    { OSSL_FUNC_CIPHER_ENCRYPT_INIT, (funcptr_t)yaopo_cipher_aes_cbc_encrypt_init },
+    { OSSL_FUNC_CIPHER_DECRYPT_INIT, (funcptr_t)yaopo_cipher_aes_cbc_decrypt_init },
+    { OSSL_FUNC_CIPHER_UPDATE, (funcptr_t)yaopo_cipher_aes_cbc_update },
+    { OSSL_FUNC_CIPHER_FINAL, (funcptr_t)yaopo_cipher_aes_cbc_final },
+    { OSSL_FUNC_CIPHER_GETTABLE_PARAMS, (funcptr_t)yaopo_cipher_aes_cbc_gettable_params },
+    { OSSL_FUNC_CIPHER_GET_PARAMS, (funcptr_t)yaopo_cipher_aes_cbc_get_params },
+    { OSSL_FUNC_CIPHER_GETTABLE_CTX_PARAMS, (funcptr_t)yaopo_cipher_aes_cbc_gettable_ctx_params },
+    { OSSL_FUNC_CIPHER_GET_CTX_PARAMS, (funcptr_t)yaopo_cipher_aes_cbc_get_ctx_params },
+    { OSSL_FUNC_CIPHER_SETTABLE_CTX_PARAMS, (funcptr_t)yaopo_cipher_aes_cbc_settable_ctx_params },
+    { OSSL_FUNC_CIPHER_SET_CTX_PARAMS, (funcptr_t)yaopo_cipher_aes_cbc_set_ctx_params },
     { 0, NULL }
 };
 
 const OSSL_ALGORITHM yaopo_ciphers[] = {
-    { "YAOPO_CIPHER", "provider=yaopo", yaopo_cipher_functions },
+    { "YAOPO_AES_CBC_CIPHER", "provider=yaopo", yaopo_cipher_aes_cbc_functions },
     { NULL, NULL, NULL, NULL}
 };
