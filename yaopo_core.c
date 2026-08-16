@@ -10,7 +10,6 @@
 #define AUTHOR "Brissouille"
 #define STATUS 1
 #define VERSION "0.1"
-#define TEE_SESSION_MAX 8
 
 #define OSSL_PROV_PARAM_TEE_SESSION_MAX "yaopo:tee_session_max"
 
@@ -19,7 +18,7 @@ extern const OSSL_ALGORITHM yaopo_ciphers[];
 struct yaopo_ctx {
     const OSSL_CORE_HANDLE *core_handle;
     struct yaopo_err_handle *err_handle;
-    struct tee_ctx *tee_ctx;
+    struct tee_ctx* tee_ctx;
 };
 
 typedef void (*funcptr_t)(void);
@@ -119,6 +118,7 @@ int OSSL_provider_init(const OSSL_CORE_HANDLE *handle,
                        void **provctx)
 {
     struct yaopo_ctx *ctx = NULL;
+    struct tee_ctx* tee_ctx_tmp = NULL;
     int status = 0;
 
     do
@@ -147,9 +147,21 @@ int OSSL_provider_init(const OSSL_CORE_HANDLE *handle,
             status = 0;
             break;
         }
-        // Init by the functions of the provider
+
+        // Init out with the functions of the provider
         *out = yaopo_functions;
 
+        // Init tee_session
+        status = tee_init(tee_ctx_tmp);
+
+        if (status == 0)
+        {
+            // Error (Openssl convention)
+            break;
+        }
+        ctx->tee_ctx = tee_ctx_tmp;
+
+        // Init provider with allocated ctx
         if (provctx == NULL)
         {
             status = 0;
@@ -165,6 +177,11 @@ int OSSL_provider_init(const OSSL_CORE_HANDLE *handle,
     // if error case, then we free the allocated variables
     if (status == 0)
     {
+        if (ctx->tee_ctx != NULL)
+        {
+            tee_free(ctx->tee_ctx);
+        }
+
         if (ctx != NULL)
         {
             yaopo_error_free(ctx->err_handle);
