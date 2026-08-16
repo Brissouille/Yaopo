@@ -1,37 +1,28 @@
 #ifndef TEE_INTERFACE_H
 
+#include "inttypes.h"
+
 #define TEE_INTERFACE_H
+
+#define TEE_SESSION_MAX 8
 
 struct tee_ctx
 {
     //TODO
+    const char* name;
+    void* context;
+    void* session;
+    void* destination;
+    uint32_t connectionMethod;
+    const void* connectionData;
+    void* operation;
+    uint32_t* returnOrigin;
+    uint32_t commandID;
 };
 
-#if 0
-TEEC_Result TEEC_InitializeContext(
-    const char* name,
-    TEEC_Context* context)
+int tee_init(struct tee_ctx* tee_ctx);
 
-void TEEC_FinalizeContext(
-    TEEC_Context* context)
+void tee_free(struct tee_ctx* tee_ctx);
 
-TEEC_Result TEEC_OpenSession (
-    TEEC_Context* context,
-    TEEC_Session* session,
-    const TEEC_UUID* destination,
-    uint32_t connectionMethod,
-    const void* connectionData,
-    TEEC_Operation* operation,
-    uint32_t* returnOrigin)
-
-void TEEC_CloseSession (
-    TEEC_Session* session)
-
-TEEC_Result TEEC_InvokeCommand(
-    TEEC_Session* session,
-    uint32_t commandID,
-    TEEC_Operation* operation,
-    uint32_t* returnOrigin)
-#endif
 
 #endif // TEE_INTERFACE_H
