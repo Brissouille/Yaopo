@@ -151,7 +151,7 @@ int OSSL_provider_init(const OSSL_CORE_HANDLE *handle,
         // Init out with the functions of the provider
         *out = yaopo_functions;
 
-        // Init tee_session
+        // Init session
         status = tee_init(tee_ctx_tmp);
 
         if (status == 0)
