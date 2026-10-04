@@ -4,8 +4,11 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "yaopo_core.h"
+
 struct yaopo_cipher_ctx
 {
+    struct yaopo_ctx* yaopo_prov;
     uint8_t *key;
     size_t key_size;
     uint8_t *iv;
@@ -126,6 +129,7 @@ static int yaopo_cipher_aes_cbc_core_init(void *yc_ctx,
                                      const OSSL_PARAM params[])
 {
     struct yaopo_cipher_ctx* yaopo_cipher_ctx = (struct yaopo_cipher_ctx*)yc_ctx;
+    struct yaopo_ctx* yaopo_prov = yaopo_cipher_ctx->yaopo_prov;
     int status = 0;
     do {
         if (yaopo_cipher_ctx == NULL)
