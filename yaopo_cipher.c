@@ -154,6 +154,15 @@ static int yaopo_cipher_aes_cbc_core_init(void *yc_ctx,
         yaopo_cipher_ctx->iv = calloc(1, iv_size);
         memcpy(yaopo_cipher_ctx->iv, iv, iv_size);
 
+        status = yaopo_open_cipher_tee_session(yaopo_prov,
+                                               yaopo_cipher_ctx->key,
+                                               key_size,
+                                               yaopo_cipher_ctx->iv,
+                                               iv_size);
+
+        if (status == 0)
+            break;
+
         status = 1;
     } while(0);
 

@@ -195,3 +195,13 @@ int OSSL_provider_init(const OSSL_CORE_HANDLE *handle,
     return status;
 }
 
+int yaopo_open_cipher_tee_session(struct yaopo_ctx* yc,
+                                  uint8_t *key,
+                                  size_t keysize,
+                                  uint8_t *iv,
+                                  size_t iv_size)
+
+{
+    int status = 0;
+    status = tee_open_session(yc->tee_ctx);
+}
