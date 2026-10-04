@@ -8,7 +8,7 @@
 
 struct tee_ctx;
 
-int tee_init(struct tee_ctx* tee_ctx);
+int tee_init(struct tee_ctx** tee_ctx);
 
 void tee_free(struct tee_ctx* tee_ctx);
 

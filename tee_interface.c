@@ -17,7 +17,7 @@ TEEC_Result TEEC_InitializeContext(
     const char* name, -> NULL
     TEEC_Context* context)
 #endif
-int tee_init(struct tee_ctx* tee_ctx)
+int tee_init(struct tee_ctx** tee_ctx)
 {
     int status = 1;
 
