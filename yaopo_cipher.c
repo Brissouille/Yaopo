@@ -29,9 +29,7 @@ static void *yaopo_cipher_aes_cbc_newctx(void *yaopo_ctx)
     struct yaopo_cipher_ctx* ctx = NULL;
     ctx = calloc(1, sizeof(*ctx));
 
-    //Key not initialised because no value
-
-    //TODO give a reference to the tee or provider itself
+    ctx->yaopo_prov = yaopo_ctx;
     return (void*)ctx;
 }
 
