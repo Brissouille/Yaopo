@@ -1,6 +1,7 @@
 #ifndef TEE_INTERFACE_H
 
 #include "inttypes.h"
+#include "tee_client_api.h"
 
 #define TEE_INTERFACE_H
 
