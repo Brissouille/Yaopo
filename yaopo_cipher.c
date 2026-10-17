@@ -27,7 +27,13 @@ static OSSL_FUNC_cipher_final_fn yaopo_cipher_aes_cbc_final;
 static void *yaopo_cipher_aes_cbc_newctx(void *yaopo_ctx)
 {
     struct yaopo_cipher_ctx* ctx = NULL;
+
     ctx = calloc(1, sizeof(*ctx));
+
+    if (ctx == NULL)
+    {
+        return (void*)ctx;
+    }
 
     ctx->yaopo_prov = yaopo_ctx;
     return (void*)ctx;
@@ -126,11 +132,17 @@ static int yaopo_cipher_aes_cbc_core_init(void *yc_ctx,
                                      size_t iv_size,
                                      const OSSL_PARAM params[])
 {
-    struct yaopo_cipher_ctx* yaopo_cipher_ctx = (struct yaopo_cipher_ctx*)yc_ctx;
-    struct yaopo_ctx* yaopo_prov = yaopo_cipher_ctx->yaopo_prov;
+    struct yaopo_cipher_ctx* yaopo_cipher_ctx = NULL;
+    struct yaopo_ctx* yaopo_prov = NULL;
     int status = 0;
+
     do {
+        yaopo_cipher_ctx = (struct yaopo_cipher_ctx*)yc_ctx;
         if (yaopo_cipher_ctx == NULL)
+            break;
+
+        yaopo_prov = (struct yaopo_ctx*)yaopo_cipher_ctx->yaopo_prov;
+        if (yaopo_prov == NULL)
             break;
 
         if (key == NULL)
@@ -147,9 +159,17 @@ static int yaopo_cipher_aes_cbc_core_init(void *yc_ctx,
 
         // key given, the yaopo_cipher_ctx can be initialised now
         yaopo_cipher_ctx->key = calloc(1, key_size);
+
+        if (yaopo_cipher_ctx->key == NULL)
+            break;
+
         memcpy(yaopo_cipher_ctx->key, key, key_size);
 
         yaopo_cipher_ctx->iv = calloc(1, iv_size);
+
+        if (yaopo_cipher_ctx->iv == NULL)
+            break;
+
         memcpy(yaopo_cipher_ctx->iv, iv, iv_size);
 
         status = yaopo_open_cipher_tee_session(yaopo_prov,
