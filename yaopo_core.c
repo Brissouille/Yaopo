@@ -132,7 +132,20 @@ int OSSL_provider_init(const OSSL_CORE_HANDLE *handle,
             break;
         }
 
-        ctx->core_handle = handle;
+        // Allocate TEE context
+        status = tee_init(&tee_ctx_tmp);
+
+        if (status == 0)
+        {
+            // Error (Openssl convention)
+            break;
+        }
+
+        if (provctx == NULL)
+        {
+            status = 0;
+            break;
+        }
 
         // Init the error handle with allocation
         status = yaopo_error_init(&(ctx->err_handle), in);
@@ -148,25 +161,16 @@ int OSSL_provider_init(const OSSL_CORE_HANDLE *handle,
             break;
         }
 
+        // Init handle
+        ctx->core_handle = handle;
+
         // Init out with the functions of the provider
         *out = yaopo_functions;
 
-        // Init session
-        status = tee_init(&tee_ctx_tmp);
-
-        if (status == 0)
-        {
-            // Error (Openssl convention)
-            break;
-        }
+        // Init Tee context
         ctx->tee_ctx = tee_ctx_tmp;
 
         // Init provider with allocated ctx
-        if (provctx == NULL)
-        {
-            status = 0;
-            break;
-        }
         *provctx = ctx;
 
         // Everything is ok
