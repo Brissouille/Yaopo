@@ -1,4 +1,5 @@
 #include "tee_interface.h"
+#include "tee_client_api.h"
 #include "stdlib.h"
 
 struct tee_ctx
@@ -24,23 +25,40 @@ int tee_init(struct tee_ctx** tee_ctx)
     TEEC_Result res;
     TEEC_Context* context_tmp = NULL;
 
-    // Allocate TEE_SESSION_MAX in the same time
-    tee_ctx_tmp = calloc(1, sizeof(*tee_ctx_tmp));
+    do
+    {
+        // Allocate TEE_SESSION_MAX in the same time
+        tee_ctx_tmp = calloc(1, sizeof(*tee_ctx_tmp));
 
-    if (tee_ctx_tmp == NULL)
-        return status;
+        if (tee_ctx_tmp == NULL)
+            break;
 
-    context_tmp = calloc(1, sizeof(TEEC_Context));
+        context_tmp = calloc(1, sizeof(TEEC_Context));
 
-    if (context_tmp == NULL)
-        return status;
+        if (context_tmp == NULL)
+            break;
 
-    tee_ctx_tmp->context = (void*)context_tmp;
+        tee_ctx_tmp->context = (void*)context_tmp;
 
-    res = TEEC_InitializeContext("MYSECURE_APP", (TEEC_Context*)tee_ctx_tmp->context);
+        res = TEEC_InitializeContext("MYSECURE_APP", (TEEC_Context*)tee_ctx_tmp->context);
 
-    //*tee_ctx = tee_ctx_tmp;
-    status = 1;
+        if (res != TEEC_SUCCESS)
+        {
+            // Error Tee
+            break;
+        }
+
+        *tee_ctx = tee_ctx_tmp;
+        status = 1;
+
+    } while(0);
+
+    if (status == 0)
+    {
+        //Error
+        free(context_tmp);
+        free(tee_ctx_tmp);
+    }
 
     return status;
 }
